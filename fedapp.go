@@ -38,7 +38,7 @@ func main() {
 	// and add it to the central widgets layout
 	button := widgets.NewQPushButton2("Authenticate", nil)
 	button.ConnectClicked(func(bool) {
-		api.CreateApp(input.Text())
+		go api.Authenticate(input.Text())
 	})
 	widget.Layout().AddWidget(button)
 
