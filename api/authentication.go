@@ -1,7 +1,6 @@
 package api
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -9,28 +8,35 @@ import (
 	"net/url"
 )
 
-// App matches the Mastadon app entitiy: https://docs.joinmastodon.org/api/entities/#app
-type App struct {
-	clientID     string
-	clientSecret string
-	clientName   string
-	redirectUris string
-	scopes       string
+// app matches the Mastadon app entitiy: https://docs.joinmastodon.org/api/entities/#app
+type app struct {
+	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+	RedirectURI  string `json:"redirect_uri"`
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	Website      string `json:"website"`
+	VapidKey     string `json:"vapid_key"`
 }
 
-// CreateApp creates and returns an App struct
-func CreateApp(instanceHost string) App {
-	newApp := App{scopes: "write follow read", redirectUris: "urn:ietf:wg:oauth:2.0:oob",
-		clientName: "fedapp"}
+// Authenticate runs through the full authentication flow
+func Authenticate(instanceHost string) {
+	newApp := createApp(instanceHost)
+	fmt.Printf("%+v", newApp)
+}
 
+// createApp creates and returns an App struct: https://docs.joinmastodon.org/api/rest/apps/#post-api-v1-apps
+func createApp(instanceHost string) app {
 	requestURL, err := url.Parse(instanceHost + "/api/v1/apps")
 	if err != nil {
 		panic(err)
 	}
 	requestURL.Scheme = "https"
 
-	requestQuery, err := json.Marshal(map[string]string{"scopes": newApp.scopes,
-		"redirect_uris": newApp.redirectUris, "client_name": newApp.clientName})
+	appParams := map[string]string{"scopes": "write follow read",
+		"redirect_uris": "urn:ietf:wg:oauth:2.0:oob", "client_name": "fedapp"}
+
+	requestQuery, err := json.Marshal(appParams)
 	if err != nil {
 		panic(err)
 	}
@@ -41,12 +47,12 @@ func CreateApp(instanceHost string) App {
 	}
 	defer resp.Body.Close()
 
-	scanner := bufio.NewScanner(resp.Body)
-	for i := 0; scanner.Scan() && i < 5; i++ {
-		fmt.Println(scanner.Text())
-	}
+	decoder := json.NewDecoder(resp.Body)
+	decoder.DisallowUnknownFields()
 
-	if err := scanner.Err(); err != nil {
+	var newApp app
+	err = decoder.Decode(&newApp)
+	if err != nil {
 		panic(err)
 	}
 
