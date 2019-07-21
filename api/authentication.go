@@ -22,7 +22,9 @@ type app struct {
 // Authenticate runs through the full authentication flow
 func Authenticate(instanceHost string) {
 	newApp := createApp(instanceHost)
-	fmt.Printf("%+v", newApp)
+	// fmt.Printf("%+v", newApp)
+
+	authorizeApp(instanceHost, newApp)
 }
 
 // createApp creates and returns an App struct: https://docs.joinmastodon.org/api/rest/apps/#post-api-v1-apps
@@ -57,4 +59,22 @@ func createApp(instanceHost string) app {
 	}
 
 	return newApp
+}
+
+func authorizeApp(instanceHost string, newApp app) {
+	requestURL, err := url.Parse(instanceHost + "/oauth/authorize")
+	if err != nil {
+		panic(err)
+	}
+	requestURL.Scheme = "https"
+
+	v := url.Values{}
+	v.Set("scope", "write follow read")
+	v.Set("response_type", "code")
+	v.Set("redirect_uri", "urn:ietf:wg:oauth:2.0:oob")
+	v.Set("client_id", newApp.ClientID)
+
+	requestURL.RawQuery = v.Encode()
+
+	fmt.Println(requestURL.String())
 }
