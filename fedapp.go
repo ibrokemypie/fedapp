@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/ibrokemypie/fedapp/api"
+	"github.com/ibrokemypie/fedapp/ui"
 
 	"github.com/therecipe/qt/widgets"
 )
@@ -20,34 +19,9 @@ func main() {
 	window.SetMinimumSize2(250, 200)
 	window.SetWindowTitle("Instance Authentication")
 
-	// create a regular widget
-	// give it a QVBoxLayout
-	// and make it the central widget of the window
-	widget := widgets.NewQWidget(nil, 0)
-	widget.SetLayout(widgets.NewQVBoxLayout())
-	window.SetCentralWidget(widget)
-
-	// // create a line edit
-	// // with a custom placeholder text
-	// // and add it to the central widgets layout
-	input := widgets.NewQLineEdit(nil)
-	input.SetPlaceholderText("Instance domain")
-	widget.Layout().AddWidget(input)
-
-	// create a button
-	// connect the clicked signal
-	// and add it to the central widgets layout
-	button := widgets.NewQPushButton2("Authenticate", nil)
-	button.ConnectClicked(func(bool) {
-		authChan := make(chan string)
-		go api.Authenticate(input.Text(), authChan)
-
-		authURL := <-authChan
-		fmt.Println(authURL)
-	})
-	widget.Layout().AddWidget(button)
-
-	window.Show()
+	if true {
+		ui.AppURLWindow(window)
+	}
 
 	// start the main Qt event loop
 	// and block until app.Exit() is called
