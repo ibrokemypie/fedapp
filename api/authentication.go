@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 )
@@ -20,11 +19,12 @@ type app struct {
 }
 
 // Authenticate runs through the full authentication flow
-func Authenticate(instanceHost string) {
+func Authenticate(instanceHost string, authChan chan string) {
 	newApp := createApp(instanceHost)
 	// fmt.Printf("%+v", newApp)
 
-	authorizeApp(instanceHost, newApp)
+	authURL := authorizeApp(instanceHost, newApp)
+	authChan <- authURL
 }
 
 // createApp creates and returns an App struct: https://docs.joinmastodon.org/api/rest/apps/#post-api-v1-apps
@@ -61,7 +61,8 @@ func createApp(instanceHost string) app {
 	return newApp
 }
 
-func authorizeApp(instanceHost string, newApp app) {
+// authorizeApp creates the url for the user to authorize the app
+func authorizeApp(instanceHost string, newApp app) string {
 	requestURL, err := url.Parse(instanceHost + "/oauth/authorize")
 	if err != nil {
 		panic(err)
@@ -76,5 +77,5 @@ func authorizeApp(instanceHost string, newApp app) {
 
 	requestURL.RawQuery = v.Encode()
 
-	fmt.Println(requestURL.String())
+	return requestURL.String()
 }

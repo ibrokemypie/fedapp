@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/ibrokemypie/fedapp/api"
@@ -38,7 +39,11 @@ func main() {
 	// and add it to the central widgets layout
 	button := widgets.NewQPushButton2("Authenticate", nil)
 	button.ConnectClicked(func(bool) {
-		go api.Authenticate(input.Text())
+		authChan := make(chan string)
+		go api.Authenticate(input.Text(), authChan)
+
+		authURL := <-authChan
+		fmt.Println(authURL)
 	})
 	widget.Layout().AddWidget(button)
 
