@@ -3,6 +3,8 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -25,6 +27,9 @@ func Authenticate(instanceHost string, authChan chan string) {
 
 	authURL := authorizeApp(instanceHost, newApp)
 	authChan <- authURL
+
+	authCode := <-authChan
+	accessToken(instanceHost, newApp, authCode)
 }
 
 // createApp creates and returns an App struct: https://docs.joinmastodon.org/api/rest/apps/#post-api-v1-apps
@@ -78,4 +83,31 @@ func authorizeApp(instanceHost string, newApp app) string {
 	requestURL.RawQuery = v.Encode()
 
 	return requestURL.String()
+}
+
+func accessToken(instanceHost string, newApp app, authCode string) {
+	requestURL, err := url.Parse(instanceHost + "/oauth/token")
+	if err != nil {
+		panic(err)
+	}
+	requestURL.Scheme = "https"
+
+	v := url.Values{}
+	v.Set("client_id", newApp.ClientID)
+	v.Set("client_secret", newApp.ClientSecret)
+	v.Set("grant_type", "authorization_code")
+	v.Set("code", authCode)
+	v.Set("redirect_uri", newApp.RedirectURI)
+
+	requestURL.RawQuery = v.Encode()
+
+	resp, err := http.Post(requestURL.String(), "application/json", nil)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(body))
+
+	fmt.Println(authCode)
 }

@@ -29,13 +29,13 @@ func AppURLWindow(window *widgets.QMainWindow) {
 		go api.Authenticate(input.Text(), authChan)
 
 		authURL := <-authChan
-		authURLWindow(window, authURL)
+		authURLWindow(window, authURL, authChan)
 	})
 	widget.Layout().AddWidget(button)
 	window.Show()
 }
 
-func authURLWindow(window *widgets.QMainWindow, authURL string) {
+func authURLWindow(window *widgets.QMainWindow, authURL string, authChan chan string) {
 	// create a regular widget
 	// give it a QVBoxLayout
 	// and make it the central widget of the window
@@ -63,7 +63,7 @@ func authURLWindow(window *widgets.QMainWindow, authURL string) {
 
 	authButton := widgets.NewQPushButton2("Authenticate", nil)
 	authButton.ConnectClicked(func(bool) {
-
+		authChan <- authCodeEntry.Text()
 	})
 	widget.Layout().AddWidget(authButton)
 
