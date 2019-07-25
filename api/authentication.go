@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -29,7 +28,8 @@ func Authenticate(instanceHost string, authChan chan string) {
 	authChan <- authURL
 
 	authCode := <-authChan
-	accessToken(instanceHost, newApp, authCode)
+	accesstoken := getAccessToken(instanceHost, newApp, authCode)
+	fmt.Println(accesstoken)
 }
 
 // createApp creates and returns an App struct: https://docs.joinmastodon.org/api/rest/apps/#post-api-v1-apps
@@ -85,7 +85,7 @@ func authorizeApp(instanceHost string, newApp app) string {
 	return requestURL.String()
 }
 
-func accessToken(instanceHost string, newApp app, authCode string) {
+func getAccessToken(instanceHost string, newApp app, authCode string) string {
 	requestURL, err := url.Parse(instanceHost + "/oauth/token")
 	if err != nil {
 		panic(err)
@@ -106,8 +106,18 @@ func accessToken(instanceHost string, newApp app, authCode string) {
 		panic(err)
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(body))
 
-	fmt.Println(authCode)
+	type accessTokenResponse struct {
+		AccessToken string `json:"access_token"`
+	}
+
+	var newResponse accessTokenResponse
+
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&newResponse)
+	if err != nil {
+		panic(err)
+	}
+
+	return newResponse.AccessToken
 }
