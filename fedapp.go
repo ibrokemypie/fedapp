@@ -17,6 +17,7 @@ func main() {
 	app.SetOrganizationName("ibrokemypie")
 	app.SetApplicationName("fedapp")
 	settings := core.NewQSettings5(nil)
+	settings.Clear()
 
 	// create a window
 	// with a minimum size of 250*200

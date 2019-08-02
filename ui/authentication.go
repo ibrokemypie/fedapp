@@ -19,6 +19,7 @@ func AppURLWindow(window *widgets.QMainWindow, settings *core.QSettings) {
 	// // and add it to the central widgets layout
 	input := widgets.NewQLineEdit(nil)
 	input.SetPlaceholderText("Instance domain")
+
 	widget.Layout().AddWidget(input)
 
 	// create a button
@@ -32,6 +33,7 @@ func AppURLWindow(window *widgets.QMainWindow, settings *core.QSettings) {
 		authURL := <-authChan
 		authURLWindow(window, authURL, authChan)
 	})
+	input.ConnectReturnPressed(button.Click)
 	widget.Layout().AddWidget(button)
 	window.Show()
 }
@@ -66,6 +68,7 @@ func authURLWindow(window *widgets.QMainWindow, authURL string, authChan chan st
 	authButton.ConnectClicked(func(bool) {
 		authChan <- authCodeEntry.Text()
 	})
+	authCodeEntry.ConnectReturnPressed(authButton.Click)
 	widget.Layout().AddWidget(authButton)
 
 	window.Show()
