@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"fmt"
+
 	"github.com/ibrokemypie/fedapp/api"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
@@ -67,6 +69,13 @@ func authURLWindow(window *widgets.QMainWindow, authURL string, authChan chan st
 	authButton := widgets.NewQPushButton2("Authenticate", nil)
 	authButton.ConnectClicked(func(bool) {
 		authChan <- authCodeEntry.Text()
+
+		outcome := <-authChan
+		if outcome == "success" {
+			fmt.Println("successfully authenticated")
+		} else {
+			fmt.Println("authentication failed")
+		}
 	})
 	authCodeEntry.ConnectReturnPressed(authButton.Click)
 	widget.Layout().AddWidget(authButton)

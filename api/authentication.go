@@ -24,18 +24,26 @@ type app struct {
 
 // Authenticate runs through the full authentication flow
 func Authenticate(instanceHost string, authChan chan string, settings *core.QSettings) {
+	succeeded := false
+
 	newApp := createApp(instanceHost)
-	// fmt.Printf("%+v", newApp)
 
 	authURL := authorizeApp(instanceHost, newApp)
 	authChan <- authURL
 
-	authCode := <-authChan
-	accessToken := getAccessToken(instanceHost, newApp, authCode)
-	fmt.Println(accessToken)
-	if VerifyToken(instanceHost, accessToken) {
-		settings.SetValue("access_token", core.NewQVariant1(accessToken))
-		settings.SetValue("instance_host", core.NewQVariant1(instanceHost))
+	for !succeeded {
+		authCode := <-authChan
+		accessToken := getAccessToken(instanceHost, newApp, authCode)
+		if VerifyToken(instanceHost, accessToken) {
+			settings.SetValue("access_token", core.NewQVariant1(accessToken))
+			settings.SetValue("instance_host", core.NewQVariant1(instanceHost))
+
+			succeeded = true
+			authChan <- "success"
+			break
+		} else {
+			authChan <- "fail"
+		}
 	}
 }
 
