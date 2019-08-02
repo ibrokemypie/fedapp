@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 
+	"github.com/therecipe/qt/core"
+
 	"github.com/ibrokemypie/fedapp/ui"
 
 	"github.com/therecipe/qt/widgets"
@@ -11,6 +13,9 @@ import (
 func main() {
 	// needs to be called once before you can start using the QWidgets
 	app := widgets.NewQApplication(len(os.Args), os.Args)
+	app.SetOrganizationName("ibrokemypie")
+	app.SetApplicationName("fedapp")
+	settings := core.NewQSettings5(nil)
 
 	// create a window
 	// with a minimum size of 250*200
@@ -20,7 +25,7 @@ func main() {
 	window.SetWindowTitle("Instance Authentication")
 
 	if true {
-		ui.AppURLWindow(window)
+		ui.AppURLWindow(window, settings)
 	}
 
 	// start the main Qt event loop

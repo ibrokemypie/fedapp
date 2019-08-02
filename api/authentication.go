@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/therecipe/qt/core"
 )
 
 // app matches the Mastadon app entitiy: https://docs.joinmastodon.org/api/entities/#app
@@ -20,7 +22,7 @@ type app struct {
 }
 
 // Authenticate runs through the full authentication flow
-func Authenticate(instanceHost string, authChan chan string) {
+func Authenticate(instanceHost string, authChan chan string, settings *core.QSettings) {
 	newApp := createApp(instanceHost)
 	// fmt.Printf("%+v", newApp)
 
@@ -30,6 +32,7 @@ func Authenticate(instanceHost string, authChan chan string) {
 	authCode := <-authChan
 	accesstoken := getAccessToken(instanceHost, newApp, authCode)
 	fmt.Println(accesstoken)
+	settings.SetValue("access_token", core.NewQVariant1(accesstoken))
 }
 
 // createApp creates and returns an App struct: https://docs.joinmastodon.org/api/rest/apps/#post-api-v1-apps

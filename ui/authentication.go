@@ -2,10 +2,11 @@ package ui
 
 import (
 	"github.com/ibrokemypie/fedapp/api"
+	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
 )
 
-func AppURLWindow(window *widgets.QMainWindow) {
+func AppURLWindow(window *widgets.QMainWindow, settings *core.QSettings) {
 	// create a regular widget
 	// give it a QVBoxLayout
 	// and make it the central widget of the window
@@ -26,7 +27,7 @@ func AppURLWindow(window *widgets.QMainWindow) {
 	button := widgets.NewQPushButton2("Authenticate", nil)
 	button.ConnectClicked(func(bool) {
 		authChan := make(chan string)
-		go api.Authenticate(input.Text(), authChan)
+		go api.Authenticate(input.Text(), authChan, settings)
 
 		authURL := <-authChan
 		authURLWindow(window, authURL, authChan)
