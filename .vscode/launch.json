@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${fileDirname}",
-            "env": {"GO111MODULE":"on","QT_HOMEBREW":"true"},
+            "env": {"QT_HOMEBREW":"true"},
             "args": []
         }
     ]
