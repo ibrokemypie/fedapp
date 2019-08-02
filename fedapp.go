@@ -24,7 +24,7 @@ func main() {
 	window.SetMinimumSize2(250, 200)
 	window.SetWindowTitle("Instance Authentication")
 
-	if true {
+	if !settings.Contains("access_token") {
 		ui.AppURLWindow(window, settings)
 	}
 
