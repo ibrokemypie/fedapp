@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -30,9 +31,12 @@ func Authenticate(instanceHost string, authChan chan string, settings *core.QSet
 	authChan <- authURL
 
 	authCode := <-authChan
-	accesstoken := getAccessToken(instanceHost, newApp, authCode)
-	fmt.Println(accesstoken)
-	settings.SetValue("access_token", core.NewQVariant1(accesstoken))
+	accessToken := getAccessToken(instanceHost, newApp, authCode)
+	fmt.Println(accessToken)
+	if VerifyToken(instanceHost, accessToken) {
+		settings.SetValue("access_token", core.NewQVariant1(accessToken))
+		settings.SetValue("instance_host", core.NewQVariant1(instanceHost))
+	}
 }
 
 // createApp creates and returns an App struct: https://docs.joinmastodon.org/api/rest/apps/#post-api-v1-apps
@@ -123,4 +127,32 @@ func getAccessToken(instanceHost string, newApp app, authCode string) string {
 	}
 
 	return newResponse.AccessToken
+}
+
+func VerifyToken(instanceHost string, accessToken string) bool {
+	if accessToken == "" || instanceHost == "" {
+		return false
+	}
+
+	fmt.Println(instanceHost)
+	fmt.Println(accessToken)
+
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", "https://"+instanceHost+"/api/v1/apps/verify_credentials", nil)
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	if resp.StatusCode != 200 {
+		return false
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if string(body) != "{\"name\":\"fedapp\",\"website\":null,\"vapid_key\":null}" {
+		return false
+	}
+
+	return true
 }

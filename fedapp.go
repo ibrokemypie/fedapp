@@ -5,6 +5,7 @@ import (
 
 	"github.com/therecipe/qt/core"
 
+	"github.com/ibrokemypie/fedapp/api"
 	"github.com/ibrokemypie/fedapp/ui"
 
 	"github.com/therecipe/qt/widgets"
@@ -24,8 +25,12 @@ func main() {
 	window.SetMinimumSize2(250, 200)
 	window.SetWindowTitle("Instance Authentication")
 
-	if !settings.Contains("access_token") {
+	if !(settings.Contains("access_token") && settings.Contains("instance_host") &&
+		api.VerifyToken(settings.Value("instance_host", core.NewQVariant1("")).ToString(),
+			settings.Value("access_token", core.NewQVariant1("")).ToString())) {
 		ui.AppURLWindow(window, settings)
+	} else {
+		os.Exit(0)
 	}
 
 	// start the main Qt event loop
